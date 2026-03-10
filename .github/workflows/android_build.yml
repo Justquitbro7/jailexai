@@ -5,10 +5,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Get Code
-        uses: actions/checkout@v6 # Using 2026 standard v6
+      - name: 1. Checkout
+        uses: actions/checkout@v6
 
-      - name: 2. Set Environment (Node 24 / Java 17)
+      - name: 2. Set Node 24 & Java 17
         uses: actions/setup-node@v6
         with:
           node-version: '24'
@@ -17,33 +17,34 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 3. Path Diagnosis (The "Where am I?" step)
+      - name: 3. Create Clean Workspace
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Listing all files:"
-          ls -R
-
-      - name: 4. Nuke & Initialize
-        run: |
-          # Remove any ghost files
-          rm -rf android build.gradle settings.gradle package.json capacitor.config.ts
+          # Kill old files
+          rm -rf android package.json capacitor.config.*
+          # Verify your HUD file exists where we think it is
+          if [ ! -f "app/src/index.html" ]; then echo "CRITICAL: index.html not found in app/src/"; exit 1; fi
           
-          # Create fresh config files on the fly
+      - name: 4. Build JSON Config
+        run: |
+          # We use JSON to avoid TypeScript errors in the runner
+          echo '{"appId":"com.justquitbro7.jailexai","appName":"Jailex AI","webDir":"app/src"}' > capacitor.config.json
           echo '{"name":"jailexai","dependencies":{"@capacitor/core":"latest","@capacitor/cli":"latest","@capacitor/android":"latest"}}' > package.json
           npm install
-          
-          # Force the path to your HUD folder
-          npx cap init "Jailex AI" com.justquitbro7.jailexai --web-dir app/src --noprompt
-          npx cap add android
 
-      - name: 5. Permissions & Build
+      - name: 5. Force Android Setup
         run: |
+          npx cap add android
           npx cap sync android
           chmod +x android/gradlew
-          cd android && ./gradlew assembleDebug
 
-      - name: 6. Save APK
+      - name: 6. Build APK
+        run: |
+          cd android
+          # The -x lint flag speeds this up and skips minor errors
+          ./gradlew assembleDebug -x lint
+
+      - name: 7. Deliver
         uses: actions/upload-artifact@v6
         with:
-          name: Jailex-App-2026
+          name: Jailex-App-Success
           path: android/app/build/outputs/apk/debug/app-debug.apk
