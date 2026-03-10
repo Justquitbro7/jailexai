@@ -5,54 +5,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 2. Set Node & Java
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - uses: actions/setup-java@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 3. The Auto-Seeker
-        run: |
-          # Clean up the workspace
-          rm -rf android package.json capacitor.config.*
-          
-          # Scan the entire repo for the HTML file (ignoring uppercase/lowercase)
-          WEB_DIR=$(find . -iname "index.html" -type f | head -n 1 | xargs dirname)
-          
-          if [ -z "$WEB_DIR" ]; then
-            echo "CRITICAL ERROR: No index.html found anywhere in the repository!"
-            echo "--- LISTING ALL FILES ---"
-            ls -R
-            exit 1
-          fi
-          
-          # Clean the path and tell Capacitor exactly where to look
-          WEB_DIR=${WEB_DIR#./}
-          echo "SUCCESS: Found your HUD file at: $WEB_DIR"
-          
-          echo "{\"appId\":\"com.justquitbro7.jailexai\",\"appName\":\"Jailex AI\",\"webDir\":\"$WEB_DIR\"}" > capacitor.config.json
-          echo "{\"name\":\"jailexai\",\"dependencies\":{\"@capacitor/core\":\"latest\",\"@capacitor/cli\":\"latest\",\"@capacitor/android\":\"latest\"}}" > package.json
-          npm install
+      - name: Grant Build Permissions
+        run: chmod +x gradlew
 
-      - name: 4. Force Android Setup
-        run: |
-          npx cap add android
-          npx cap sync android
-          chmod +x android/gradlew
+      - name: Assemble Android APK
+        run: ./gradlew assembleDebug -x lint
 
-      - name: 5. Build APK
-        run: |
-          cd android
-          ./gradlew assembleDebug -x lint
-
-      - name: 6. Deliver APK
+      - name: Upload Final App
         uses: actions/upload-artifact@v4
         with:
-          name: Jailex-App-Final
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Jailex-Mobile-App
+          path: app/build/outputs/apk/debug/app-debug.apk
