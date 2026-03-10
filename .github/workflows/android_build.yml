@@ -19,28 +19,28 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Deep Clean & Install
+      - name: Force Clean Environment
         run: |
-          # Force remove any conflicting Android files in the root
+          # Remove any files that confuse the Capacitor builder
           rm -f build.gradle
           rm -f settings.gradle
           rm -rf android
+          # Create a dummy folder if it doesn't exist to prevent crash
+          mkdir -p app/src
           
-          # Install fresh Capacitor tools
-          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
-          npm install
-
-      - name: Initialize & Sync
+      - name: Install & Initialize
         run: |
-          # Create a fresh Android project shell
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
+          # We manually create the config to ensure the path is 100% correct
           npx cap init "Jailex AI" com.justquitbro7.jailexai --web-dir app/src
           npx cap add android
+
+      - name: Sync & Grant Permissions
+        run: |
           npx cap sync android
+          chmod +x android/gradlew
 
-      - name: Grant Build Permissions
-        run: chmod +x android/gradlew
-
-      - name: Assemble Debug APK
+      - name: Build Debug APK
         run: |
           cd android
           ./gradlew assembleDebug
