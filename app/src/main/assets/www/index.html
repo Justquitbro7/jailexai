@@ -1,1 +1,58 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jaden AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .hud-container {
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px #00ffcc, inset 0 0 15px #00ffcc;
+            padding: 40px 60px;
+            border-radius: 5px;
+            background: rgba(0, 255, 204, 0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px #00ffcc;
+            letter-spacing: 4px;
+        }
+
+        p {
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hud-container">
+        <h1>JADEN AI</h1>
+        <p>SYSTEM ONLINE</p>
+    </div>
+</body>
+</html>
