@@ -8,7 +8,7 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (2026 Standard)
+      - name: Setup Node.js (2026 Default)
         uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -19,34 +19,35 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Force Clean Environment
+      - name: 1. Deep Clean Environment
         run: |
-          # Remove any files that confuse the Capacitor builder
+          # Kill any old Android files that are breaking the build
+          rm -rf android
           rm -f build.gradle
           rm -f settings.gradle
-          rm -rf android
-          # Create a dummy folder if it doesn't exist to prevent crash
+          # Ensure your HUD folder actually exists
           mkdir -p app/src
           
-      - name: Install & Initialize
+      - name: 2. Fresh Capacitor Install
         run: |
           npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
-          # We manually create the config to ensure the path is 100% correct
-          npx cap init "Jailex AI" com.justquitbro7.jailexai --web-dir app/src
-          npx cap add android
+          # This command forces a brand new config to be generated
+          npx cap init "Jailex AI" com.justquitbro7.jailexai --web-dir app/src --noprompt
 
-      - name: Sync & Grant Permissions
+      - name: 3. Create Android Shell
         run: |
+          npx cap add android
           npx cap sync android
+          # Fix permissions for the builder
           chmod +x android/gradlew
 
-      - name: Build Debug APK
+      - name: 4. Final APK Assembly
         run: |
           cd android
           ./gradlew assembleDebug
 
-      - name: Upload Jailex APK
+      - name: 5. Deliver App
         uses: actions/upload-artifact@v4
         with:
-          name: Jailex-App-Beta
+          name: Jailex-Final-Beta
           path: android/app/build/outputs/apk/debug/app-debug.apk
