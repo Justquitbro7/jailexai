@@ -5,49 +5,45 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Grab HUD Code
-        uses: actions/checkout@v4
+      - name: 1. Get Code
+        uses: actions/checkout@v6 # Using 2026 standard v6
 
-      - name: 2. Set 2026 Standards (Node 24 / Java 17)
-        uses: actions/setup-node@v4
+      - name: 2. Set Environment (Node 24 / Java 17)
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 3. The "Nuke" Step
+      - name: 3. Path Diagnosis (The "Where am I?" step)
         run: |
-          # This deletes the conflicting files so Capacitor can't find them
-          rm -f build.gradle
-          rm -f settings.gradle
-          rm -rf android
-          rm -f capacitor.config.ts
-          rm -f package.json
+          echo "Current directory: $(pwd)"
+          echo "Listing all files:"
+          ls -R
+
+      - name: 4. Nuke & Initialize
+        run: |
+          # Remove any ghost files
+          rm -rf android build.gradle settings.gradle package.json capacitor.config.ts
           
-      - name: 4. Re-create Project Files
-        run: |
-          # We create a fresh package.json on the fly
+          # Create fresh config files on the fly
           echo '{"name":"jailexai","dependencies":{"@capacitor/core":"latest","@capacitor/cli":"latest","@capacitor/android":"latest"}}' > package.json
           npm install
           
-          # We force a fresh Capacitor config that points ONLY to your HUD
+          # Force the path to your HUD folder
           npx cap init "Jailex AI" com.justquitbro7.jailexai --web-dir app/src --noprompt
           npx cap add android
 
-      - name: 5. Fix Android Permissions & Sync
+      - name: 5. Permissions & Build
         run: |
           npx cap sync android
           chmod +x android/gradlew
+          cd android && ./gradlew assembleDebug
 
-      - name: 6. Assemble APK
-        run: |
-          cd android
-          ./gradlew assembleDebug
-
-      - name: 7. Upload Result
-        uses: actions/upload-artifact@v4
+      - name: 6. Save APK
+        uses: actions/upload-artifact@v6
         with:
-          name: Jailex-App-Beta
+          name: Jailex-App-2026
           path: android/app/build/outputs/apk/debug/app-debug.apk
