@@ -1,13 +1,22 @@
 {
-  "name": "jailex-ai",
+  "name": "jailexai",
   "version": "1.0.0",
-  "description": "Jailex Streaming HUD",
+  "description": "Jailex Streaming HUD - Android Build",
+  "main": "index.js",
   "dependencies": {
-    "@capacitor/android": "^6.0.0",
-    "@capacitor/cli": "^6.0.0",
-    "@capacitor/core": "^6.0.0"
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0"
   },
   "scripts": {
-    "build": "echo 'No web build step needed'"
-  }
+    "build": "echo 'Skipping web build, using local app/src assets'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jailex",
+    "streaming",
+    "hud"
+  ],
+  "author": "justquitbro7",
+  "license": "MIT"
 }
